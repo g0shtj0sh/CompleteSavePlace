@@ -1,6 +1,6 @@
 {
   "name": "completesaveplace-docs",
-  "version": "0.6.4",
+  "version": "0.6.5",
   "private": true,
   "description": "API documentation and preset catalog for CompleteSavePlace",
   "scripts": {

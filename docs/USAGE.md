@@ -23,7 +23,7 @@ gh repo clone g0shtj0sh/CompleteSavePlace
 
 Choose a versioned preset loader from [Script Presets](PRESETS.md), or load the
 checked-out script using your runtime's local script facility. No GitHub token
-is required. Presets download the root engine pinned to `v0.6.4` by default.
+is required. Presets download the root engine pinned to `v0.6.5` by default.
 For local development, explicitly set `USE_LOCAL_CORE = true` and configure
 `CORE_PATH` in the wrapper. A missing local file then fails visibly.
 

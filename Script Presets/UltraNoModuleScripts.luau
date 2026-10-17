@@ -6,7 +6,7 @@
 -- Relative to the runtime's file workspace, not the Git checkout on your PC.
 local CORE_PATH = "CompleteSavePlace/saveinstance.luau"
 local USE_LOCAL_CORE = false -- opt in explicitly when developing a local engine
-local CORE_URL = "https://raw.githubusercontent.com/g0shtj0sh/CompleteSavePlace/v0.6.4/saveinstance.luau"
+local CORE_URL = "https://raw.githubusercontent.com/g0shtj0sh/CompleteSavePlace/v0.6.5/saveinstance.luau"
 local PRESET_ID = "UltraNoModuleScripts"
 local options = {
 	mode = "full",
@@ -88,27 +88,40 @@ end
 local titleBudget = 80 - #PRESET_ID - 3
 local title = cleanName(placeName or "", titleBudget)
 if title == "" then title = "Place " .. tostring(game.PlaceId) end
-local baseName = title .. " - " .. PRESET_ID
-local outputFolder, outputName
-for attempt = 1, 9999 do
-	local candidate = baseName .. (attempt == 1 and "" or " (" .. tostring(attempt) .. ")")
-	local checked, exists = pcall(isfolder, candidate)
-	if not checked or type(exists) ~= "boolean" then fail("Could not check output folder: " .. candidate) end
-	if not exists and type(isfile) == "function" then
-		local fileChecked, fileExists = pcall(isfile, candidate)
-		if not fileChecked then fail("Could not check output path: " .. candidate) end
-		exists = fileExists
+local function createOutputFolder(folderTitle)
+	local baseName = folderTitle .. " - " .. PRESET_ID
+	for attempt = 1, 9999 do
+		local candidate = baseName .. (attempt == 1 and "" or " (" .. tostring(attempt) .. ")")
+		local checked, exists = pcall(isfolder, candidate)
+		if not checked or type(exists) ~= "boolean" then return nil, "Could not check output folder: " .. candidate end
+		if not exists and type(isfile) == "function" then
+			local fileChecked, fileExists = pcall(isfile, candidate)
+			if not fileChecked then return nil, "Could not check output path: " .. candidate end
+			exists = fileExists
+		end
+		if not exists then
+			local created, createError = pcall(makefolder, candidate)
+			if not created then return nil, "Could not create output folder: " .. tostring(createError) end
+			local verified, folderExists = pcall(isfolder, candidate)
+			if not verified or folderExists ~= true then return nil, "Output folder was not created: " .. candidate end
+			return candidate
+		end
 	end
-	if not exists then
-		local created, createError = pcall(makefolder, candidate)
-		if not created then fail("Could not create output folder: " .. tostring(createError)) end
-		local verified, folderExists = pcall(isfolder, candidate)
-		if not verified or folderExists ~= true then fail("Output folder was not created: " .. candidate) end
-		outputFolder, outputName = candidate, title
-		break
-	end
+	return nil, "No available output folder name; archive or move older exports."
 end
-if not outputFolder then fail("No available output folder name; archive or move older exports.") end
+local outputName = title
+local outputFolder, folderError = createOutputFolder(title)
+if not outputFolder and string.find(title, "[\128-\255]") then
+	-- Some runtimes silently fail to create UTF-8 paths. Retry the complete
+	-- output path using the readable ASCII portion, keeping the place title in reports.
+	local asciiTitle = string.gsub(title, "[\128-\255]", "")
+	asciiTitle = cleanName(string.gsub(asciiTitle, "%(%s*%)", ""), titleBudget)
+	if asciiTitle == "" then asciiTitle = "Place " .. tostring(game.PlaceId) end
+	warn(prefix .. tostring(folderError) .. "; retrying with ASCII name: " .. asciiTitle)
+	outputFolder, folderError = createOutputFolder(asciiTitle)
+	outputName = asciiTitle
+end
+if not outputFolder then fail(folderError) end
 options.FilePath = outputFolder .. "/" .. outputName .. ".rbxl"
 
 local runId = tostring(game.PlaceId) .. "_" .. tostring(os.time()) .. "_" .. tostring(math.random(100000, 999999))
@@ -140,7 +153,7 @@ local function onProgress(progress)
 	latestProgress = progress
 	progress.preset = PRESET_ID
 	progress.profile = "Universal"
-	progress.wrapperVersion = "0.6.4"
+	progress.wrapperVersion = "0.6.5"
 	progress.sourceOrigin = sourceOrigin
 	progress.validation = "unverified"
 	local wrote, writeError = pcall(function()
@@ -196,7 +209,7 @@ local report = type(exportReport) == "table" and exportReport or {
 	propertyAudit = "unavailable_from_this_core",
 }
 report.preset = PRESET_ID
-report.wrapperVersion = "0.6.4"
+report.wrapperVersion = "0.6.5"
 report.profile = "Universal"
 report.sourceOrigin = sourceOrigin
 report.sourceBytes = sourceBytes
@@ -230,8 +243,8 @@ end
 if report.criticalGeometryOmissions and report.criticalGeometryOmissions > 0 then
 	warn(prefix .. tostring(report.criticalGeometryOmissions) .. " geometry/terrain property columns were omitted. See the report; missing road geometry is not repaired by a completed export.")
 end
-if report.engineVersion ~= "0.6.4" then
-	warn(prefix .. "Selected core version: " .. tostring(report.engineVersion) .. "; expected 0.6.4. Check for an outdated local CORE_PATH.")
+if report.engineVersion ~= "0.6.5" then
+	warn(prefix .. "Selected core version: " .. tostring(report.engineVersion) .. "; expected 0.6.5. Check for an outdated local CORE_PATH.")
 end
 if not ok then
 	fail("Export failed. Check CORE_PATH and console details: " .. tostring(result))

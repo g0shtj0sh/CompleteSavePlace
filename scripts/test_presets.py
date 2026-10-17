@@ -17,13 +17,14 @@ local potassium = __POTASSIUM__
 local presetId = "__PRESET_ID__"
 local gameTitle = "(\u{5b66}\u{4e71}) Gakuran"
 local expectedCorePath = potassium and "CompleteSavePlace/Executors/Potassium/saveinstance.luau" or "CompleteSavePlace/saveinstance.luau"
-local expectedCoreUrl = potassium and "/v0.6.4/Executors/Potassium/saveinstance.luau" or "/v0.6.4/saveinstance.luau"
+local expectedCoreUrl = potassium and "/v0.6.5/Executors/Potassium/saveinstance.luau" or "/v0.6.5/saveinstance.luau"
 local function scenario(kind)
     local files, messages, folders = {}, {}, {}
     local title = gameTitle
     if kind == "invalid-name" then title = 'A/B:C*D?E"F<G>H|I\0J\\K.. ' end
     if kind == "long-unicode-name" then title = string.rep("\u{5b66}", 200) end
     if kind == "blank-name" then title = " .. " end
+    if kind == "unicode-only-silent" then title = "\u{5b66}\u{4e71}" end
     local originalFolder = gameTitle .. " - " .. presetId
     if kind == "folder-collision" or kind == "multiple-collisions" then folders[originalFolder] = true end
     if kind == "multiple-collisions" then folders[originalFolder .. " (2)"] = true end
@@ -83,6 +84,10 @@ local function scenario(kind)
     end
     env.makefolder = function(path)
         if kind == "folder-error" then error("cannot create folder") end
+        if string.find(path,"[\128-\255]") then
+            if kind == "unicode-folder-error" then error("UTF-8 paths unsupported") end
+            if kind == "unicode-folder-silent" or kind == "unicode-only-silent" then return end
+        end
         assert(not folders[path] and not files[path], "Never reuse an existing export folder or file")
         if kind ~= "folder-not-created" then folders[path] = true end
     end
@@ -113,6 +118,10 @@ local function scenario(kind)
                     assert(folder==originalFolder .. " (2)")
                 elseif kind=="multiple-collisions" then
                     assert(folder==originalFolder .. " (3)")
+                elseif kind=="unicode-folder-error" or kind=="unicode-folder-silent" then
+                    assert(folder=="Gakuran - " .. presetId and filename=="Gakuran")
+                elseif kind=="unicode-only-silent" then
+                    assert(folder=="Place 123 - " .. presetId and filename=="Place 123")
                 elseif kind=="invalid-name" then
                     assert(folder=="A B C D E F G H I J K - " .. presetId)
                 elseif kind=="name-fallback" then
@@ -127,8 +136,8 @@ local function scenario(kind)
                 if kind == "runtime-error" then error("serializer failed") end
                 if kind ~= "missing-output" then files[options.FilePath] = "mock output" end
                 if kind == "legacy-core" then return nil end
-                if kind == "engine-reported-error" then return {ok=false, error="internal engine failure", engineVersion="0.6.4"} end
-                return {ok=true, engineVersion="0.6.4", validation="unverified", criticalGeometryOmissions=kind=="geometry-omission" and 2 or 0}
+                if kind == "engine-reported-error" then return {ok=false, error="internal engine failure", engineVersion="0.6.5"} end
+                return {ok=true, engineVersion="0.6.5", validation="unverified", criticalGeometryOmissions=kind=="geometry-omission" and 2 or 0}
             end
         end
     end
@@ -159,7 +168,7 @@ local function scenario(kind)
     end
     if kind == "success" or kind == "remote-core" then
         assert(localReads == 0 and remoteReads == 1, "Default must not silently load a stale local core")
-        assert(capturedReport.sourceOrigin and string.find(capturedReport.sourceOrigin, "/v0.6.4/", 1, true))
+        assert(capturedReport.sourceOrigin and string.find(capturedReport.sourceOrigin, "/v0.6.5/", 1, true))
     elseif kind == "local-core" or kind == "local-core-missing" then
         assert(localReads == 1 and remoteReads == 0, "Local development must use only its explicit source")
     end
@@ -188,7 +197,7 @@ local function scenario(kind)
     for path in files do assert(not string.find(path, "write-test.tmp", 1, true), "Probe was not cleaned up") end
     successes += 1
 end
-for _, kind in {"success", "remote-core", "local-core", "local-core-missing", "missing-api", "probe-error", "corrupt-probe", "missing-core", "compile-error", "bad-core", "runtime-error", "missing-output", "no-isfile", "geometry-omission", "legacy-core", "report-write-error", "progress-write-error", "engine-reported-error", "folder-collision", "multiple-collisions", "file-collision", "invalid-name", "long-unicode-name", "blank-name", "name-fallback", "missing-name", "legacy-name-api", "missing-folder-api", "folder-error", "folder-check-error", "folder-not-created"} do
+for _, kind in {"success", "remote-core", "local-core", "local-core-missing", "missing-api", "probe-error", "corrupt-probe", "missing-core", "compile-error", "bad-core", "runtime-error", "missing-output", "no-isfile", "geometry-omission", "legacy-core", "report-write-error", "progress-write-error", "engine-reported-error", "folder-collision", "multiple-collisions", "file-collision", "invalid-name", "long-unicode-name", "blank-name", "name-fallback", "missing-name", "legacy-name-api", "missing-folder-api", "folder-error", "folder-check-error", "folder-not-created", "unicode-folder-error", "unicode-folder-silent", "unicode-only-silent"} do
     scenario(kind)
 end
 print("Preset runtime scenarios passed: " .. successes)

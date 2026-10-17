@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.6.5 ? 2026-10-17
+
+- Retry failed Unicode output folder creation with the readable ASCII title,
+  or `Place <placeId>` when no ASCII title remains. Folder and place filename
+  use the fallback; reports retain the original game name. Existing exports
+  remain protected by collision suffixes.
+- Verified the silent Unicode folder failure and successful ASCII write/read
+  preflight on the connected Potassium client, without starting an export.
+- Added regression scenarios for thrown and silent Unicode path failures,
+  including a title containing only non-ASCII characters.
+
 ## 0.6.4 ? 2026-10-17
 
 - Omit empty Folder placeholders created for unsupported services. Real services

@@ -59,27 +59,40 @@ end
 local titleBudget = 80 - #PRESET_ID - 3
 local title = cleanName(placeName or "", titleBudget)
 if title == "" then title = "Place " .. tostring(game.PlaceId) end
-local baseName = title .. " - " .. PRESET_ID
-local outputFolder, outputName
-for attempt = 1, 9999 do
-	local candidate = baseName .. (attempt == 1 and "" or " (" .. tostring(attempt) .. ")")
-	local checked, exists = pcall(isfolder, candidate)
-	if not checked or type(exists) ~= "boolean" then fail("Could not check output folder: " .. candidate) end
-	if not exists and type(isfile) == "function" then
-		local fileChecked, fileExists = pcall(isfile, candidate)
-		if not fileChecked then fail("Could not check output path: " .. candidate) end
-		exists = fileExists
+local function createOutputFolder(folderTitle)
+	local baseName = folderTitle .. " - " .. PRESET_ID
+	for attempt = 1, 9999 do
+		local candidate = baseName .. (attempt == 1 and "" or " (" .. tostring(attempt) .. ")")
+		local checked, exists = pcall(isfolder, candidate)
+		if not checked or type(exists) ~= "boolean" then return nil, "Could not check output folder: " .. candidate end
+		if not exists and type(isfile) == "function" then
+			local fileChecked, fileExists = pcall(isfile, candidate)
+			if not fileChecked then return nil, "Could not check output path: " .. candidate end
+			exists = fileExists
+		end
+		if not exists then
+			local created, createError = pcall(makefolder, candidate)
+			if not created then return nil, "Could not create output folder: " .. tostring(createError) end
+			local verified, folderExists = pcall(isfolder, candidate)
+			if not verified or folderExists ~= true then return nil, "Output folder was not created: " .. candidate end
+			return candidate
+		end
 	end
-	if not exists then
-		local created, createError = pcall(makefolder, candidate)
-		if not created then fail("Could not create output folder: " .. tostring(createError)) end
-		local verified, folderExists = pcall(isfolder, candidate)
-		if not verified or folderExists ~= true then fail("Output folder was not created: " .. candidate) end
-		outputFolder, outputName = candidate, title
-		break
-	end
+	return nil, "No available output folder name; archive or move older exports."
 end
-if not outputFolder then fail("No available output folder name; archive or move older exports.") end
+local outputName = title
+local outputFolder, folderError = createOutputFolder(title)
+if not outputFolder and string.find(title, "[\128-\255]") then
+	-- Some runtimes silently fail to create UTF-8 paths. Retry the complete
+	-- output path using the readable ASCII portion, keeping the place title in reports.
+	local asciiTitle = string.gsub(title, "[\128-\255]", "")
+	asciiTitle = cleanName(string.gsub(asciiTitle, "%(%s*%)", ""), titleBudget)
+	if asciiTitle == "" then asciiTitle = "Place " .. tostring(game.PlaceId) end
+	warn(prefix .. tostring(folderError) .. "; retrying with ASCII name: " .. asciiTitle)
+	outputFolder, folderError = createOutputFolder(asciiTitle)
+	outputName = asciiTitle
+end
+if not outputFolder then fail(folderError) end
 options.FilePath = outputFolder .. "/" .. outputName .. ".rbxl"
 
 local runId = tostring(game.PlaceId) .. "_" .. tostring(os.time()) .. "_" .. tostring(math.random(100000, 999999))

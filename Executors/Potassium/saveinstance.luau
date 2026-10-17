@@ -1,7 +1,7 @@
 -- CompleteSavePlace / Potassium entry point
 -- Shared serializer, explicit native API bindings. AGPL-3.0; see LICENSE and NOTICE.md.
 -- Reference: https://docs.potassium.pro/api-reference
-local CORE_URL = "https://raw.githubusercontent.com/g0shtj0sh/CompleteSavePlace/v0.6.4/saveinstance.luau"
+local CORE_URL = "https://raw.githubusercontent.com/g0shtj0sh/CompleteSavePlace/v0.6.5/saveinstance.luau"
 local runtimeOptions = ... or {}
 local identify = identifyexecutor or getexecutorname
 assert(type(identify) == "function", "Potassium: identifyexecutor is unavailable")
