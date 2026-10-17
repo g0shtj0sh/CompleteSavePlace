@@ -18,7 +18,7 @@ Run this preset:
 
 ```lua
 loadstring(game:HttpGet(
-    "https://raw.githubusercontent.com/g0shtj0sh/CompleteSavePlace/v0.6.3/Script%20Presets/DiagnosticSavePlace.luau",
+    "https://raw.githubusercontent.com/g0shtj0sh/CompleteSavePlace/v0.6.4/Script%20Presets/DiagnosticSavePlace.luau",
     true
 ))()
 ```
@@ -56,7 +56,7 @@ Run this preset:
 
 ```lua
 loadstring(game:HttpGet(
-    "https://raw.githubusercontent.com/g0shtj0sh/CompleteSavePlace/v0.6.3/Script%20Presets/MapSavePlace.luau",
+    "https://raw.githubusercontent.com/g0shtj0sh/CompleteSavePlace/v0.6.4/Script%20Presets/MapSavePlace.luau",
     true
 ))()
 ```
@@ -95,7 +95,7 @@ Run this preset:
 
 ```lua
 loadstring(game:HttpGet(
-    "https://raw.githubusercontent.com/g0shtj0sh/CompleteSavePlace/v0.6.3/Script%20Presets/ScriptsSavePlace.luau",
+    "https://raw.githubusercontent.com/g0shtj0sh/CompleteSavePlace/v0.6.4/Script%20Presets/ScriptsSavePlace.luau",
     true
 ))()
 ```
@@ -136,7 +136,7 @@ Run this preset:
 
 ```lua
 loadstring(game:HttpGet(
-    "https://raw.githubusercontent.com/g0shtj0sh/CompleteSavePlace/v0.6.3/Script%20Presets/UltraCompleteSavePlace.luau",
+    "https://raw.githubusercontent.com/g0shtj0sh/CompleteSavePlace/v0.6.4/Script%20Presets/UltraCompleteSavePlace.luau",
     true
 ))()
 ```
@@ -185,7 +185,7 @@ Run this preset:
 
 ```lua
 loadstring(game:HttpGet(
-    "https://raw.githubusercontent.com/g0shtj0sh/CompleteSavePlace/v0.6.3/Script%20Presets/UltraNoModuleScripts.luau",
+    "https://raw.githubusercontent.com/g0shtj0sh/CompleteSavePlace/v0.6.4/Script%20Presets/UltraNoModuleScripts.luau",
     true
 ))()
 ```
@@ -244,7 +244,7 @@ CompleteSavePlace/
 
 Execute the chosen preset through the runtime's local script facility, or use the versioned loader above.
 
-The preset downloads the engine pinned to `v0.6.3` by default, avoiding stale local copies.
+The preset downloads the engine pinned to `v0.6.4` by default, avoiding stale local copies.
 For local development, explicitly set `USE_LOCAL_CORE = true` and adjust `CORE_PATH`.
 No GitHub token is required. The runtime still needs HTTP access and file APIs.
 

@@ -3841,7 +3841,7 @@ end
 	Report completion does not certify file validity or Studio compatibility. Example:
 	```lua
 	local Params = {
-		RepoURL = "https://raw.githubusercontent.com/g0shtj0sh/CompleteSavePlace/v0.6.3/",
+		RepoURL = "https://raw.githubusercontent.com/g0shtj0sh/CompleteSavePlace/v0.6.4/",
 		SSI = "saveinstance",
 	}
 
@@ -3868,7 +3868,7 @@ local function completeSavePlace(...)
 	GLOBAL_ENV.CSP = true
 	local ExportReport = {
 		schemaVersion = 1,
-		engineVersion = "0.6.3",
+		engineVersion = "0.6.4",
 		ok = false,
 		validation = "unverified",
 		propertyAudit = "binary_columns_only",
@@ -5405,6 +5405,17 @@ local function completeSavePlace(...)
 				end
 			elseif tagOverride == "Folder" then
 				propClass = "Instance"
+			end
+
+			-- Unsupported services are retained as containers only when they hold
+			-- content. Empty placeholders add no recoverable state to a place.
+			local originalClass = not virtual and ClassList[instance.ClassName]
+			if not tagOverride and class == "Folder" and originalClass and originalClass.Service then
+				local children = (override and override.__Children) or instance:GetChildren()
+				if #children == 0 then
+					ExportReport.emptyServiceContainersSkipped = (ExportReport.emptyServiceContainersSkipped or 0) + 1
+					return
+				end
 			end
 
 			local e = {

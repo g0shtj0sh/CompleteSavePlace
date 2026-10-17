@@ -30,8 +30,8 @@ local HasAutoRemaps=false
 local ExportReport={}
 local Progress={}
 local function yieldIfDue() end
-local function isClassSerializable() return true end
-local function replaceClassName() error('Unexpected not-creatable remap') end
+local function isClassSerializable(class) return class~='InternalService' end
+local function replaceClassName(instance,name) return {Properties={Name=name}} end
 __COLLECT__
 __REF_CHECK__
 local original=collect({root})
@@ -62,6 +62,19 @@ InstancesOverrides={}
 IgnoreList.ModuleScript=true
 local explicit=collect({root})
 assert(explicit.instCount==2,'Explicit IgnoreList rules still take priority')
+IgnoreList={}
+ClassList.InternalService={Service=true}
+ClassList.Workspace.Service=true
+local emptyService=node('InternalService','Empty internal service')
+local payload=node('Part','Recovered content')
+local usedService=node('InternalService','Internal service with content',{payload})
+local emptyFolder=node('Folder','Intentional empty folder')
+local emptyWorkspace=node('Workspace','Workspace')
+local services=collect({emptyService,usedService,emptyFolder,emptyWorkspace})
+assert(services.entries[emptyService]==nil and services.refs[emptyService]==nil)
+assert(services.entries[usedService].class=='Folder' and services.entries[payload].parent==usedService)
+assert(services.entries[emptyFolder] and services.entries[emptyWorkspace].class=='Workspace')
+assert(services.instCount==4 and #services.roots==3 and ExportReport.emptyServiceContainersSkipped==1)
 print('Actual collection passed: default modules, negative control, preserved descendant geometry, Folder containers, hierarchy, referents, explicit ignore precedence.')
 '''
 

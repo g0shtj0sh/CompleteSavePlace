@@ -24,7 +24,7 @@ for _, scenario in {"success", "missing-bsp", "wrong-executor", "identify-error"
     env.crypt = {base64encode=function() return "B64" end, base64decode=function() return "RAW" end, lz4compress=function() return "LZ4" end}
     env.game = {HttpGet=function(_, url)
         fetched = true
-        assert(string.find(url, "/v0.6.3/saveinstance.luau", 1, true))
+        assert(string.find(url, "/v0.6.4/saveinstance.luau", 1, true))
         return "SHARED_CORE"
     end}
     env.warn = function() warned = true end

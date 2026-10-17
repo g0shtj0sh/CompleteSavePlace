@@ -17,7 +17,7 @@ local potassium = __POTASSIUM__
 local presetId = "__PRESET_ID__"
 local gameTitle = "(\u{5b66}\u{4e71}) Gakuran"
 local expectedCorePath = potassium and "CompleteSavePlace/Executors/Potassium/saveinstance.luau" or "CompleteSavePlace/saveinstance.luau"
-local expectedCoreUrl = potassium and "/v0.6.3/Executors/Potassium/saveinstance.luau" or "/v0.6.3/saveinstance.luau"
+local expectedCoreUrl = potassium and "/v0.6.4/Executors/Potassium/saveinstance.luau" or "/v0.6.4/saveinstance.luau"
 local function scenario(kind)
     local files, messages, folders = {}, {}, {}
     local title = gameTitle
@@ -127,8 +127,8 @@ local function scenario(kind)
                 if kind == "runtime-error" then error("serializer failed") end
                 if kind ~= "missing-output" then files[options.FilePath] = "mock output" end
                 if kind == "legacy-core" then return nil end
-                if kind == "engine-reported-error" then return {ok=false, error="internal engine failure", engineVersion="0.6.3"} end
-                return {ok=true, engineVersion="0.6.3", validation="unverified", criticalGeometryOmissions=kind=="geometry-omission" and 2 or 0}
+                if kind == "engine-reported-error" then return {ok=false, error="internal engine failure", engineVersion="0.6.4"} end
+                return {ok=true, engineVersion="0.6.4", validation="unverified", criticalGeometryOmissions=kind=="geometry-omission" and 2 or 0}
             end
         end
     end
@@ -159,7 +159,7 @@ local function scenario(kind)
     end
     if kind == "success" or kind == "remote-core" then
         assert(localReads == 0 and remoteReads == 1, "Default must not silently load a stale local core")
-        assert(capturedReport.sourceOrigin and string.find(capturedReport.sourceOrigin, "/v0.6.3/", 1, true))
+        assert(capturedReport.sourceOrigin and string.find(capturedReport.sourceOrigin, "/v0.6.4/", 1, true))
     elseif kind == "local-core" or kind == "local-core-missing" then
         assert(localReads == 1 and remoteReads == 0, "Local development must use only its explicit source")
     end

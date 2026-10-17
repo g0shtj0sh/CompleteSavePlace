@@ -74,7 +74,7 @@ Run a preset in a compatible environment with HTTP access and file APIs:
 
 ```lua
 loadstring(game:HttpGet(
-    "https://raw.githubusercontent.com/g0shtj0sh/CompleteSavePlace/v0.6.3/Script%20Presets/UltraCompleteSavePlace.luau",
+    "https://raw.githubusercontent.com/g0shtj0sh/CompleteSavePlace/v0.6.4/Script%20Presets/UltraCompleteSavePlace.luau",
     true
 ))()
 ```
@@ -196,7 +196,7 @@ Select **Potassium** above any preset and click **Copier le script**. The loader
 
 Both entry points use the same serializer. The Potassium entry point is under
 `Executors/Potassium/saveinstance.luau`; its five presets are under
-`Executors/Potassium/Script Presets/`. Loaders pin both stages to v0.6.3.
+`Executors/Potassium/Script Presets/`. Loaders pin both stages to v0.6.4.
 For local adapter development, edit its `CORE_URL` as well as the preset's
 `CORE_PATH`; opting into a local adapter alone still downloads its pinned core.
 

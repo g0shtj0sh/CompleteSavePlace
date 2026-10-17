@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.6.4 ? 2026-10-17
+
+- Omit empty Folder placeholders created for unsupported services. Real services
+  and ordinary empty folders remain unchanged; unsupported services with children
+  retain their containers and content. Reports count skipped empty service containers.
+- Added collection regression coverage for each case, including parent references.
+
 ## 0.6.3 ? 2026-10-17
 
 - Preserved reloadable `MeshPart.MeshContent`, `MeshPart.TextureContent`, and
