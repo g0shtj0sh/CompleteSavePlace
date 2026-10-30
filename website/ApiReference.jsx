@@ -36,7 +36,7 @@ export default function ApiReference() {
   const options=useMemo(()=>data.options.filter(o=>(group==='All options'||o.group===group)
     && (!overridesOnly||Object.hasOwn(presetOptions,o.name))
     && (o.name+' '+o.type+' '+o.description).toLowerCase().includes(query.toLowerCase())),[group,query,presetOptions,overridesOnly]);
-  const snippet='local options = '+lua(presetOptions)+'\n\nlocal report = completeSavePlace(options)';
+  const snippet=(preset.gps?'-- Engine options only. Start GPS collection with the versioned preset launcher.\n':'')+'local options = '+lua(presetOptions)+'\n\nlocal report = completeSavePlace(options)';
   return <Layout title="API Explorer" description="Search and explore every CompleteSavePlace option, compare preset overrides, and copy a configuration.">
     <div className="csp-workspace">
       <aside className="csp-rail" aria-label="API categories">

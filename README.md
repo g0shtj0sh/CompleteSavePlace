@@ -27,6 +27,8 @@
 
 The [UltraNoModuleScripts preset](docs/PRESETS.md#ultranomodulescripts) keeps Ultra settings without module code. Module containers become Folders to preserve descendant models. Universal and Potassium copy launchers are available in the documentation.
 
+The experimental [GPS presets](docs/PRESETS.md#gps-streaming-collection) collect streaming zones on a bounded grid before Ultra export, with or without ModuleScript code. Both Universal and Potassium profiles are available. Coverage and Studio output remain unverified.
+
 ## The project
 
 **CompleteSavePlace** is a Luau toolkit for exporting accessible Roblox
@@ -64,7 +66,7 @@ script-job scheduling and avoids repeated bytecode reads; a native call that
 blocks the client still cannot be interrupted by a Lua timeout.
 
 Availability depends on the runtime, readable properties, and loaded instances.
-The Lua variant differs from the Luau source and is not feature-equivalent.
+GPS collection can retain streamed-out instance trees; it cannot guarantee complete map coverage.
 
 ## Getting started
 
@@ -75,7 +77,7 @@ LocalScript or Studio command-bar script.
 
 ```lua
 local source = game:HttpGet(
-    "https://raw.githubusercontent.com/g0shtj0sh/CompleteSavePlace/v0.6.5/saveinstance.luau",
+    "https://raw.githubusercontent.com/g0shtj0sh/CompleteSavePlace/v0.7.0/saveinstance.luau",
     true
 )
 local completeSavePlace = assert(loadstring(source, "CompleteSavePlace"))()

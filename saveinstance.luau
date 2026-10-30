@@ -3841,7 +3841,7 @@ end
 	Report completion does not certify file validity or Studio compatibility. Example:
 	```lua
 	local Params = {
-		RepoURL = "https://raw.githubusercontent.com/g0shtj0sh/CompleteSavePlace/v0.6.5/",
+		RepoURL = "https://raw.githubusercontent.com/g0shtj0sh/CompleteSavePlace/v0.7.0/",
 		SSI = "saveinstance",
 	}
 
@@ -3868,7 +3868,7 @@ local function completeSavePlace(...)
 	GLOBAL_ENV.CSP = true
 	local ExportReport = {
 		schemaVersion = 1,
-		engineVersion = "0.6.5",
+		engineVersion = "0.7.0",
 		ok = false,
 		validation = "unverified",
 		propertyAudit = "binary_columns_only",
@@ -6145,6 +6145,10 @@ local function completeSavePlace(...)
 			local NilInstancesFixes = OPTIONS.NilInstancesFixes
 
 			for _, instance in global_container.getnilinstances() do
+				-- Streamed-out GPS nodes belong to their captured Workspace hierarchy,
+				-- not to the separate NilInstances recovery container.
+				local capture = RuntimeAdapter.workspaceCapture
+				if capture and capture.children[instance] then continue end
 				if instance:IsA("ServiceProvider") then -- ? game, UserSettings & GlobalSettings roots; their services (e.g. UserGameSettings) can't be parented elsewhere
 					instance = nil
 				else
@@ -6345,6 +6349,22 @@ local function completeSavePlace(...)
 			for _, root in extra.roots do
 				allRoots[#allRoots + 1] = root
 			end
+		end
+
+		-- GPS retains original instances so native geometry readers still receive
+		-- real instances. Restore only the captured tree and selected stable values.
+		local capture = RuntimeAdapter.workspaceCapture
+		if capture then
+			for instance, children in capture.children do
+				local override = table.clone(InstancesOverrides[instance] or {})
+				override.__Children = children
+				override.Properties = table.clone(override.Properties or {})
+				for name, value in capture.properties[instance] or {} do
+					if override.Properties[name] == nil then override.Properties[name] = value end
+				end
+				InstancesOverrides[instance] = override
+			end
+			ExportReport.gps = capture.summary
 		end
 
 		setMeter("Collecting instances")

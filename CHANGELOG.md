@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.7.0 ? 2026-10-30
+
+- Added UltraCompleteSavePlaceGPS and UltraNoModuleScriptsGPS for Universal and
+  Potassium, with a shared, version-pinned streaming collector.
+- Added bounded adaptive/manual X/Z grids, sequential streaming requests, a
+  progress panel and stop-and-export button, and time/object/point limits.
+- Retained original instance references, observed hierarchy, and selected
+  property snapshots across stream-out; excluded captured nodes from separate
+  NilInstances recovery. Added GPS summaries to progress and export reports.
+- Added deterministic planner/archive/lifecycle tests and actual engine merge
+  integration coverage. Live streaming capture and Studio reopening remain
+  unverified. Real map bounds, terrain accumulation, and full coverage are not
+  inferred from a completed traversal.
+
 ## 0.6.5 ? 2026-10-17
 
 - Retry failed Unicode output folder creation with the readable ASCII title,

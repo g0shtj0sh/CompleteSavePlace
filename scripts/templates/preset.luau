@@ -9,6 +9,10 @@ local USE_LOCAL_CORE = false -- opt in explicitly when developing a local engine
 local CORE_URL = "https://raw.githubusercontent.com/g0shtj0sh/CompleteSavePlace/v$VERSION/$CORE_URL_PATH"
 local PRESET_ID = "$PRESET_ID"
 local options = $OPTIONS
+local GPS_ENABLED = $GPS_ENABLED
+local launchOptions = ... or {}
+-- GPS presets accept {GPS={Bounds={Min=Vector3.new(...),Max=Vector3.new(...)}, ...}}.
+assert(type(launchOptions) == "table", "Preset arguments must be a table")
 
 local prefix = "[CSP / " .. PRESET_ID .. "] "
 local function fail(message)
@@ -120,8 +124,14 @@ local sourceBytes
 local progressPath = outputFolder .. "/progress.json"
 local lastProgressLog, progressWriteFailed = -math.huge, false
 local latestProgress
+local workspaceCapture
 local function onProgress(progress)
 	latestProgress = progress
+	if workspaceCapture then
+		local gps = workspaceCapture.summary
+		progress.gps = {reason=gps.reason,coverage=gps.coverage,pointsAttempted=gps.pointsAttempted,
+			retainedInstances=gps.retainedInstances}
+	end
 	progress.preset = PRESET_ID
 	progress.profile = "$PROFILE"
 	progress.wrapperVersion = "$VERSION"
@@ -142,6 +152,20 @@ local function onProgress(progress)
 end
 print(prefix .. "Progress checkpoint: " .. progressPath)
 local ok, result = xpcall(function()
+	if GPS_ENABLED then
+		onProgress({phase="gps-loading",detail={operation="Loading GPS collector"}})
+		local gpsSource
+		if USE_LOCAL_CORE then
+			gpsSource = readfile("CompleteSavePlace/StreamingCapture.luau")
+		else
+			gpsSource = game:HttpGet("https://raw.githubusercontent.com/g0shtj0sh/CompleteSavePlace/v$VERSION/StreamingCapture.luau",true)
+		end
+		local gpsChunk, gpsError = loadstring(gpsSource,"CompleteSavePlace/GPS")
+		assert(gpsChunk,"GPS compilation failed: " .. tostring(gpsError))
+		local gps = gpsChunk()
+		workspaceCapture = gps.run(launchOptions.GPS,onProgress)
+		print(prefix .. "GPS stopped: " .. tostring(workspaceCapture.summary.reason) .. "; coverage remains unverified.")
+	end
 	local source
 	if USE_LOCAL_CORE then
 		print(prefix .. "Loading local core: " .. CORE_PATH)
@@ -161,7 +185,7 @@ local ok, result = xpcall(function()
 		error("Core compilation failed: " .. tostring(compileError), 0)
 	end
 	onProgress({ phase = "loading-dependencies" })
-	local completeSavePlace = chunk({ onProgress = onProgress })
+	local completeSavePlace = chunk({ onProgress = onProgress, workspaceCapture = workspaceCapture })
 	if type(completeSavePlace) ~= "function" then
 		error("Core did not return an export function", 0)
 	end
@@ -187,9 +211,11 @@ report.sourceBytes = sourceBytes
 report.progressPath = progressPath
 report.outputFolder = outputFolder
 report.placeName = placeName or title
+report.gps = report.gps or workspaceCapture and workspaceCapture.summary
 report.lastProgress = report.lastProgress or latestProgress
 report.wrapperError = not ok and tostring(result) or nil
 report.outputPath = report.outputPath or options.FilePath
+workspaceCapture = nil -- release retained instances after the exporter finishes
 local existenceChecked, outputExists
 if type(isfile) == "function" then
 	existenceChecked, outputExists = pcall(isfile, report.outputPath)

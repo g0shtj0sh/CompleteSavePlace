@@ -7,9 +7,11 @@
 La [documentation des presets](https://g0shtj0sh.github.io/CompleteSavePlace/docs/PRESETS/)
 propose un bouton **Copier le script** pour chaque configuration, avec le choix
 **Universal / Potassium**. Le [dossier Potassium](Executors/Potassium/README.md)
-contient une entrée adaptée et cinq presets : lectures binaires natives,
+contient une entrée adaptée et sept presets : lectures binaires natives,
 compression LZ4 contrôlée et rapports détaillés. Les résultats réels restent à
 vérifier dans Studio.
+
+Les [deux presets GPS exp?rimentaux](docs/PRESETS.md#gps-streaming-collection) ajoutent une collecte par zones avant les versions Ultra avec ou sans ModuleScripts. La couverture totale reste non garantie ; le rendu doit ?tre v?rifi? dans Studio.
 
 **Une base claire pour sauvegarder les instances Roblox accessibles.**
 

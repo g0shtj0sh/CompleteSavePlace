@@ -34,7 +34,9 @@ writing fails, the wrapper prints the reason.
   failing position, reason, and an example instance path. Totals may exceed
   the sample count.
 - `streamingEnabled` reports the workspace setting when readable. Unloaded
-  instances cannot be recovered just by increasing the export scope.
+  instances cannot be recovered just by increasing the export scope. The
+  experimental [GPS presets](PRESETS.md#gps-streaming-collection) request regions
+  before export and retain observed Workspace trees; coverage remains unverified.
 
 Property auditing currently covers **binary columns only**. XML reports use
 `propertyAudit: "not_instrumented_for_xml"`; zero recorded omissions there

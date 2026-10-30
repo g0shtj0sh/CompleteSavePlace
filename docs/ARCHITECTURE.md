@@ -40,9 +40,9 @@ Moonwave 1.4.2 generates the API from `saveinstance.luau`. Guides and a local
 search index are built into the static Docusaurus website, deployed by GitHub
 Actions to GitHub Pages.
 
-`Script Presets/presets.json` defines the five configurations. The generator
+`Script Presets/presets.json` defines the seven configurations. The generator
 combines them with a shared wrapper template. Wrappers perform a basic text
-write/read probe and load the pinned `v0.6.5` engine by default. Local development
+write/read probe and load the pinned `v0.7.0` engine by default. Local development
 requires an explicit `USE_LOCAL_CORE = true`. They record source identity,
 exceptions, and file existence in a JSON sidecar separately from file validity.
 The actual serializer is not duplicated.
@@ -167,3 +167,19 @@ namespace now use CompleteSavePlace. The executable filename remains
 `saveinstance.luau`. Presets share one documentation page with per-loader
 Universal/Potassium switches. XML output contains no exporter credit comment.
 The cache reader preserves prior executor safety state across the rename.
+
+## GPS collection in 0.7.0
+
+`StreamingCapture.luau` is a separate collector shared by the two GPS presets.
+The wrappers load it from the same pinned tag and pass its retained tree through
+`RuntimeAdapter.workspaceCapture` (forwarded by the Potassium adapter).
+The engine merges captured children and selected property snapshots into its
+existing instance overrides before collection. Captured nodes do not enter
+NilInstances recovery. Reports serialize only the GPS summary, not instance keys.
+
+The collector holds original objects rather than modifying or cloning the world.
+No game remotes, character movement, or streaming-setting changes are performed.
+The grid is bounded and incremental; scene content observed by the client is the
+only automatic source of estimated bounds. Tests simulate streaming and exercise
+the real planner, archive, request lifecycle, and engine merge/collection code.
+Live Roblox streaming and complete Studio output have not been verified.

@@ -68,13 +68,134 @@ Choose Universal or Potassium below and click **Copier le script**.
 
 <PresetLauncher id="UltraNoModuleScripts" />
 
+## UltraCompleteSavePlaceGPS
+
+Ultra with **experimental GPS collection before export**, including ModuleScript
+code. The collector requests streaming regions on a bounded X/Z grid and retains
+received Workspace instances and their observed hierarchy.
+
+<PresetLauncher id="UltraCompleteSavePlaceGPS" />
+
+## UltraNoModuleScriptsGPS
+
+The same GPS collector with the UltraNoModuleScripts engine configuration.
+Module containers become Folders; descendant models stay in the captured tree.
+
+<PresetLauncher id="UltraNoModuleScriptsGPS" />
+
+## GPS streaming collection
+
+**Experimental, not yet verified on a live streaming map or by reopening its
+output in Studio.** These presets add a collection stage before ordinary Ultra
+export. They request regions with Roblox's `RequestStreamAroundAsync`; they do
+not teleport the character, change streaming settings, or execute game remotes.
+
+The initial grid is centered on the character (or camera when the character is
+unavailable). Anchored geometry observed on the client can expand the estimated
+X/Z bounds. Those bounds describe observed content, **not the real map boundary**.
+A distant missing district may never be discovered. Use manual bounds when known.
+Requests remain subject to server behavior, bandwidth, and client memory.
+
+### Run and stop
+
+1. Choose one of the GPS launchers above and select Universal or Potassium.
+2. Run the copied loader. The GPS panel shows attempted points, an estimated
+   grid total, retained instance count, and a progress bar. The estimate can grow.
+3. Let the bounded traversal finish, or click **Arr?ter le GPS et exporter la
+   collecte** to save the content captured so far.
+4. Ordinary serialization starts after collection. Open the resulting place in
+   Studio and inspect the `gps` section of `report.json`.
+
+The GPS bar measures **point attempts**, including unsuccessful requests. It
+never represents a percentage of the real map recovered. A returned streaming
+request does not establish that a region is fully loaded. If the progress panel
+cannot be created, console/checkpoint progress and automatic budgets still work.
+
+### Default budgets
+
+- `Step = 512`: distance between grid points in studs. These are request points,
+  not Roblox's internal streaming chunks.
+- `InitialRadius = 1024`, `MaxRadius = 4096`: initial X/Z range and hard maximum
+  distance on each axis from the starting position.
+- `MaxCells = 196`, `MaxSeconds = 600`: at most 196 point attempts or 10 minutes
+  of collection. The later Ultra export has its own duration.
+- `RequestTimeout = 4`, `SettleSeconds = 1`: bounded request duration followed by
+  a short interval to receive instances. One request runs at a time. An overdue
+  yielding request ends collection rather than accumulating background requests.
+- `MaxInstances = 300000`: maximum retained Workspace nodes. This is an object
+  count budget, not a RAM measurement or a guarantee against native freezes.
+- `AutoExpand = true`: expand from observed anchored geometry within MaxRadius.
+  Supplying `Bounds` makes the X/Z area fixed. `Height` defaults to the initial
+  character/camera Y coordinate; a single horizontal pass does not cover every floor.
+
+The collector exports a partial result when a budget is reached. A grid exhausted
+within estimated bounds does not establish full coverage. Native calls that block
+the whole client cannot be interrupted by Lua deadlines or the stop button.
+
+### Optional custom area
+
+Pass GPS settings to the **preset loader**, not to the serializer's options table.
+For example, a fixed area within 2048 studs of the starting player:
+
+```lua
+local origin = game:GetService("Players").LocalPlayer.Character:GetPivot().Position
+local run = loadstring(game:HttpGet(
+    "https://raw.githubusercontent.com/g0shtj0sh/CompleteSavePlace/v0.7.0/Executors/Potassium/Script%20Presets/UltraNoModuleScriptsGPS.luau",
+    true
+))
+run({GPS = {
+    Bounds = {
+        Min = origin - Vector3.new(2048, 0, 2048),
+        Max = origin + Vector3.new(2048, 0, 2048),
+    },
+    Step = 512,
+    MaxRadius = 4096,
+    MaxCells = 100,
+    MaxSeconds = 600,
+}})
+```
+
+Use the Universal path or `UltraCompleteSavePlaceGPS.luau` to switch profiles or
+module selection. Bounds must fit within MaxRadius of the starting position;
+invalid settings fail before collection. The grid can round to adjacent request
+points, while all point coordinates remain within the hard MaxRadius limits.
+For local development, also install `StreamingCapture.luau` at
+`CompleteSavePlace/StreamingCapture.luau` alongside the engine.
+
+### What is retained
+
+The archive keeps **original instance references**, not clones, so native geometry
+readers still receive original objects. It records observed parent/child links,
+Name, and BasePart CFrame/Size, then supplies that tree to the shared serializer.
+Streamed-out nodes are excluded from separate NilInstances recovery to avoid
+moving them out of the captured Workspace hierarchy. Duplicate names remain
+valid; repeat observations of the same object do not create duplicates.
+
+Remaining properties and geometry are read during export. If the game destroys
+or recreates objects, a retained reference may become unreadable or recreated
+objects may appear twice. Dynamic objects are not a synchronized world snapshot.
+**Terrain voxel regions are not accumulated**; missing Terrain and unsupported
+union data remain separate limitations. The collector does not reconstruct
+private assets, server-only content, or detailed meshes from LOD placeholders.
+
+### GPS report
+
+`report.json.gps` records `reason`, `coverage: "unverified"`, point attempts,
+requests completed/failed, retained object count, elapsed collection time,
+estimated bounds, and the budgets. Its `points` list records request coordinates,
+request return/success status, elapsed time, and newly retained instances per point.
+These counts describe observations, not region completeness. Reasons include `grid_exhausted`, `cell_limit`,
+`time_limit`, `instance_limit`, `user_stopped`, `request_failures`,
+`request_deadline`, and `streaming_disabled`. With streaming disabled, the
+collector inventories the current Workspace and proceeds without region requests.
+
 ## Versioned loaders
 
 Run a preset in a compatible environment with HTTP access and file APIs:
 
 ```lua
 loadstring(game:HttpGet(
-    "https://raw.githubusercontent.com/g0shtj0sh/CompleteSavePlace/v0.6.5/Script%20Presets/UltraCompleteSavePlace.luau",
+    "https://raw.githubusercontent.com/g0shtj0sh/CompleteSavePlace/v0.7.0/Script%20Presets/UltraCompleteSavePlace.luau",
     true
 ))()
 ```
@@ -200,7 +321,7 @@ Select **Potassium** above any preset and click **Copier le script**. The loader
 
 Both entry points use the same serializer. The Potassium entry point is under
 `Executors/Potassium/saveinstance.luau`; its five presets are under
-`Executors/Potassium/Script Presets/`. Loaders pin both stages to v0.6.5.
+`Executors/Potassium/Script Presets/`. Loaders pin both stages to v0.7.0.
 For local adapter development, edit its `CORE_URL` as well as the preset's
 `CORE_PATH`; opting into a local adapter alone still downloads its pinned core.
 

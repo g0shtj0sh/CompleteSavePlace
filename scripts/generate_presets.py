@@ -72,12 +72,14 @@ def render() -> dict[Path, str]:
             PRESET_ID=identifier, SUMMARY=preset["summary"], STATUS=preset["status"], OPTIONS=lua(options),
             VERSION=version, CORE_PATH="CompleteSavePlace/saveinstance.luau",
             CORE_URL_PATH="saveinstance.luau", PROFILE="Universal",
+            GPS_ENABLED=lua(preset.get("gps", False)),
         )
         outputs[ROOT / "Executors/Potassium/Script Presets" / f"{identifier}.luau"] = template.substitute(
             PRESET_ID=identifier, SUMMARY=preset["summary"] + " Potassium profile.", STATUS=preset["status"],
             OPTIONS=lua(potassium_options(preset)), VERSION=version,
             CORE_PATH="CompleteSavePlace/Executors/Potassium/saveinstance.luau",
             CORE_URL_PATH="Executors/Potassium/saveinstance.luau", PROFILE="Potassium",
+            GPS_ENABLED=lua(preset.get("gps", False)),
         )
     if catalog["developmentTarget"] not in identifiers:
         raise ValueError("Development target is missing from the catalog")
@@ -90,7 +92,7 @@ def render() -> dict[Path, str]:
     ]
     for preset in catalog["presets"]:
         identifier = preset["id"]
-        lines += [f"## [{identifier}]({identifier}.luau)", "", preset["summary"], "",
+        lines += [f"## [{identifier}]({identifier}.luau)", "", preset["summary"], "", *( ["GPS collection settings and limits: [guide](../docs/PRESETS.md#gps-streaming-collection).", ""] if preset.get("gps") else [] ),
                   f"Status: `{preset['status']}`.", "", "Run this preset:", "", "```lua",
                   "loadstring(game:HttpGet(",
                   f'    "https://raw.githubusercontent.com/g0shtj0sh/CompleteSavePlace/v{version}/Script%20Presets/{identifier}.luau",',

@@ -6,7 +6,7 @@
 -- Relative to the runtime's file workspace, not the Git checkout on your PC.
 local CORE_PATH = "CompleteSavePlace/saveinstance.luau"
 local USE_LOCAL_CORE = false -- opt in explicitly when developing a local engine
-local CORE_URL = "https://raw.githubusercontent.com/g0shtj0sh/CompleteSavePlace/v0.6.5/saveinstance.luau"
+local CORE_URL = "https://raw.githubusercontent.com/g0shtj0sh/CompleteSavePlace/v0.7.0/saveinstance.luau"
 local PRESET_ID = "ScriptsSavePlace"
 local options = {
 	mode = "scripts",
@@ -29,6 +29,10 @@ local options = {
 	__DEBUG_MODE = true,
 	WorkBudgetMs = 4,
 }
+local GPS_ENABLED = false
+local launchOptions = ... or {}
+-- GPS presets accept {GPS={Bounds={Min=Vector3.new(...),Max=Vector3.new(...)}, ...}}.
+assert(type(launchOptions) == "table", "Preset arguments must be a table")
 
 local prefix = "[CSP / " .. PRESET_ID .. "] "
 local function fail(message)
@@ -140,11 +144,17 @@ local sourceBytes
 local progressPath = outputFolder .. "/progress.json"
 local lastProgressLog, progressWriteFailed = -math.huge, false
 local latestProgress
+local workspaceCapture
 local function onProgress(progress)
 	latestProgress = progress
+	if workspaceCapture then
+		local gps = workspaceCapture.summary
+		progress.gps = {reason=gps.reason,coverage=gps.coverage,pointsAttempted=gps.pointsAttempted,
+			retainedInstances=gps.retainedInstances}
+	end
 	progress.preset = PRESET_ID
 	progress.profile = "Universal"
-	progress.wrapperVersion = "0.6.5"
+	progress.wrapperVersion = "0.7.0"
 	progress.sourceOrigin = sourceOrigin
 	progress.validation = "unverified"
 	local wrote, writeError = pcall(function()
@@ -162,6 +172,20 @@ local function onProgress(progress)
 end
 print(prefix .. "Progress checkpoint: " .. progressPath)
 local ok, result = xpcall(function()
+	if GPS_ENABLED then
+		onProgress({phase="gps-loading",detail={operation="Loading GPS collector"}})
+		local gpsSource
+		if USE_LOCAL_CORE then
+			gpsSource = readfile("CompleteSavePlace/StreamingCapture.luau")
+		else
+			gpsSource = game:HttpGet("https://raw.githubusercontent.com/g0shtj0sh/CompleteSavePlace/v0.7.0/StreamingCapture.luau",true)
+		end
+		local gpsChunk, gpsError = loadstring(gpsSource,"CompleteSavePlace/GPS")
+		assert(gpsChunk,"GPS compilation failed: " .. tostring(gpsError))
+		local gps = gpsChunk()
+		workspaceCapture = gps.run(launchOptions.GPS,onProgress)
+		print(prefix .. "GPS stopped: " .. tostring(workspaceCapture.summary.reason) .. "; coverage remains unverified.")
+	end
 	local source
 	if USE_LOCAL_CORE then
 		print(prefix .. "Loading local core: " .. CORE_PATH)
@@ -181,7 +205,7 @@ local ok, result = xpcall(function()
 		error("Core compilation failed: " .. tostring(compileError), 0)
 	end
 	onProgress({ phase = "loading-dependencies" })
-	local completeSavePlace = chunk({ onProgress = onProgress })
+	local completeSavePlace = chunk({ onProgress = onProgress, workspaceCapture = workspaceCapture })
 	if type(completeSavePlace) ~= "function" then
 		error("Core did not return an export function", 0)
 	end
@@ -200,16 +224,18 @@ local report = type(exportReport) == "table" and exportReport or {
 	propertyAudit = "unavailable_from_this_core",
 }
 report.preset = PRESET_ID
-report.wrapperVersion = "0.6.5"
+report.wrapperVersion = "0.7.0"
 report.profile = "Universal"
 report.sourceOrigin = sourceOrigin
 report.sourceBytes = sourceBytes
 report.progressPath = progressPath
 report.outputFolder = outputFolder
 report.placeName = placeName or title
+report.gps = report.gps or workspaceCapture and workspaceCapture.summary
 report.lastProgress = report.lastProgress or latestProgress
 report.wrapperError = not ok and tostring(result) or nil
 report.outputPath = report.outputPath or options.FilePath
+workspaceCapture = nil -- release retained instances after the exporter finishes
 local existenceChecked, outputExists
 if type(isfile) == "function" then
 	existenceChecked, outputExists = pcall(isfile, report.outputPath)
@@ -234,8 +260,8 @@ end
 if report.criticalGeometryOmissions and report.criticalGeometryOmissions > 0 then
 	warn(prefix .. tostring(report.criticalGeometryOmissions) .. " geometry/terrain property columns were omitted. See the report; missing road geometry is not repaired by a completed export.")
 end
-if report.engineVersion ~= "0.6.5" then
-	warn(prefix .. "Selected core version: " .. tostring(report.engineVersion) .. "; expected 0.6.5. Check for an outdated local CORE_PATH.")
+if report.engineVersion ~= "0.7.0" then
+	warn(prefix .. "Selected core version: " .. tostring(report.engineVersion) .. "; expected 0.7.0. Check for an outdated local CORE_PATH.")
 end
 if not ok then
 	fail("Export failed. Check CORE_PATH and console details: " .. tostring(result))
