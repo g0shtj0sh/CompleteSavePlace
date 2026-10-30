@@ -62,6 +62,8 @@ assert(tiny.limitReached and tiny.count==1)
 local function lifecycle(mode)
     local tick,calls,cancelled,disconnected,destroyed=0,0,0,false,false
     local callback,stopButton,lastProgress
+    local awaitingTicks=0
+    local panelGui
     local world=node('Workspace','Workspace')
     world.StreamingEnabled=mode~='disabled'
     local part=node('Part','Original',world)
@@ -87,7 +89,9 @@ local function lifecycle(mode)
     env.UDim2={new=function(...) return {...} end,fromOffset=function(...) return {...} end,fromScale=function(...) return {...} end}
     env.Instance={new=function(class)
         if mode=='headless' then error('no GUI') end
-        return {Destroy=function() destroyed=true end,Activated={Connect=function(_,fn) stopButton=fn end}}
+        local item={Destroy=function() destroyed=true end,Activated={Connect=function(_,fn) stopButton=fn end}}
+        if class=="ScreenGui" then panelGui=item end
+        return item
     end}
     env.game={GetService=function(_,name)
         if name=='Players' then return {LocalPlayer=player} end
@@ -99,6 +103,13 @@ local function lifecycle(mode)
         wait=function(seconds)
             tick+=mode=='time' and 0.6 or seconds or 0.01
             if mode=='user' and tick>=0.1 then stopButton() end
+            if lastProgress and lastProgress.phase=='gps-awaiting-export' then
+                awaitingTicks+=1
+                if mode=='manual' and awaitingTicks==1 then callback(node('Part','Manual exploration',world)) end
+                if mode=='closed' then panelGui.Parent=nil;return end
+                assert(not destroyed,'Panel stays open while export awaits a click')
+                if awaitingTicks==3 then stopButton() end
+            end
         end,
         cancel=function(thread) cancelled+=1;coroutine.close(thread) end}
     local chunk=assert(loadstring(source));setfenv(chunk,env)
@@ -108,9 +119,9 @@ local function lifecycle(mode)
         lastProgress=progress
         if mode=='progress-error' then error('checkpoint sink broke') end
     end)
-    assert(disconnected,'Disconnect stream listeners on completion')
+    assert(disconnected or mode=='headless','Disconnect stream listeners on completion')
     assert(destroyed or mode=='headless','Remove progress UI')
-    if mode=='progress-error' then assert(not success);return end
+    if mode=='progress-error' or mode=='headless' or mode=='closed' then assert(not success);return end
     assert(success,tostring(result))
     assert(result.summary.coverage=='unverified' and result.summary.terrainSnapshots==false)
     assert(result.children[world][1]==part,'Original geometry survives stream-out')
@@ -119,6 +130,7 @@ local function lifecycle(mode)
     elseif mode=='deadline' then assert(calls==1 and cancelled==1 and result.summary.reason=='request_deadline')
     elseif mode=='user' then assert(result.summary.reason=='user_stopped')
     elseif mode=='time' then assert(result.summary.reason=='time_limit')
+    elseif mode=='manual' then assert(result.summary.retainedInstances==3)
     elseif mode=='instances' then assert(result.summary.reason=='instance_limit')
     else assert(calls==3 and result.summary.reason=='cell_limit' and result.summary.retainedInstances==2) end
     assert(#result.summary.points==calls)
@@ -126,9 +138,11 @@ local function lifecycle(mode)
         assert(result.summary.points[1].newInstances==1 and result.summary.points[1].requestOK)
         assert(result.summary.points[2].newInstances==0)
     end
+    assert(result.summary.exportTrigger=='button')
+    if mode~='user' then assert(awaitingTicks==3,'No automatic return/export after budgets or traversal') end
     assert(lastProgress.meter.label=='GPS points attempted (estimated grid)')
 end
-for _,mode in {'normal','disabled','errors','deadline','user','time','headless','instances','progress-error'} do lifecycle(mode) end
+for _,mode in {'normal','disabled','errors','deadline','user','time','headless','instances','progress-error','manual','closed'} do lifecycle(mode) end
 
 -- Exercise the actual core merge followed by its actual instance collector.
 local InstancesOverrides={[first]={Properties={Name='Explicit name wins'}}}

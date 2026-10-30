@@ -3841,7 +3841,7 @@ end
 	Report completion does not certify file validity or Studio compatibility. Example:
 	```lua
 	local Params = {
-		RepoURL = "https://raw.githubusercontent.com/g0shtj0sh/CompleteSavePlace/v0.7.0/",
+		RepoURL = "https://raw.githubusercontent.com/g0shtj0sh/CompleteSavePlace/v0.7.1/",
 		SSI = "saveinstance",
 	}
 
@@ -3868,7 +3868,7 @@ local function completeSavePlace(...)
 	GLOBAL_ENV.CSP = true
 	local ExportReport = {
 		schemaVersion = 1,
-		engineVersion = "0.7.0",
+		engineVersion = "0.7.1",
 		ok = false,
 		validation = "unverified",
 		propertyAudit = "binary_columns_only",

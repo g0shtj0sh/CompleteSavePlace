@@ -148,7 +148,7 @@ local function makeUI(stop)
 		local button = Instance.new("TextButton")
 		button.Size, button.Position = UDim2.new(1,-24,0,32),UDim2.fromOffset(12,92)
 		button.BackgroundColor3, button.TextColor3 = Color3.fromRGB(98,230,193),Color3.fromRGB(12,22,32)
-		button.Text, button.TextSize = "Arrêter le GPS et exporter la collecte",14
+		button.Text, button.TextSize = "Exporter la collecte",14
 		button.Parent = panel
 		button.Activated:Connect(stop)
 		local hiddenUI = gethui or get_hidden_gui
@@ -183,18 +183,20 @@ function GPS.run(config, onProgress)
 		requestTimeout=settings.RequestTimeout,settleSeconds=settings.SettleSeconds,autoExpand=settings.AutoExpand,
 		points={},
 		propertySnapshots="Name and BasePart CFrame/Size; remaining properties read during export",retention="original_instance_references"}
-	local started, stopped = os.clock(),false
+	local started, stopped, exportRequested, awaitingExport = os.clock(),false,false,false
 	local pending, head = {},1
-	local ui = makeUI(function() stopped=true end)
+	local ui = makeUI(function() stopped=true;exportRequested=true end)
+	assert(ui,"GPS: export requires the Exporter button; progress panel unavailable. No export started.")
 	local connection, requestThread
 	local function stopReason()
+		if not ui.gui.Parent then return "panel_closed" end
 		if stopped then return "user_stopped" end
 		if archive.limitReached then return "instance_limit" end
 		if os.clock()-started>=settings.MaxSeconds then return "time_limit" end
 	end
 	local function progress(operation)
 		local total = planner:total()
-		local value = {phase="gps",detail={operation=operation,pointsAttempted=planner.attempted,
+		local value = {phase=awaitingExport and "gps-awaiting-export" or "gps",detail={operation=operation,pointsAttempted=planner.attempted,
 			estimatedPoints=total,retainedInstances=archive.count,requestFailures=summary.requestFailures},
 			meter={completed=planner.attempted,total=total,label="GPS points attempted (estimated grid)"}}
 		if ui then
@@ -209,10 +211,10 @@ function GPS.run(config, onProgress)
 			planner:observe(item.Position,item.Size.Magnitude/2)
 		end
 	end
-	local function drain()
+	local function drain(manual)
 		local processed = 0
 		local lastYield = os.clock()
-		while head<=#pending and not stopReason() do
+		while head<=#pending and (manual and not exportRequested and not archive.limitReached or not manual and not stopReason()) do
 			local item = pending[head]
 			head += 1
 			remember(item)
@@ -240,8 +242,8 @@ function GPS.run(config, onProgress)
 		end
 		table.clear(initial)
 		drain()
-		if not workspace.StreamingEnabled then summary.reason="streaming_disabled";return end
-		while not stopReason() do
+		if not workspace.StreamingEnabled then summary.reason="streaming_disabled" end
+		while workspace.StreamingEnabled and not stopReason() do
 			local point, reason = planner:nextPoint()
 			if not point then summary.reason=reason;break end
 			local cellStarted, countBefore = os.clock(),archive.count
@@ -278,6 +280,25 @@ function GPS.run(config, onProgress)
 			progress("Zone parcourue")
 		end
 		summary.reason=summary.reason or stopReason()
+		if requestThread then pcall(task.cancel,requestThread);requestThread=nil end
+		summary.automaticSeconds=os.clock()-started
+		-- Budgets stop automatic requests, never authorize an export. Keep
+		-- collecting manually visited regions within the object budget until click.
+		local waitStarted = os.clock()
+		awaitingExport = not exportRequested
+		while not exportRequested do
+			if not ui.gui.Parent then error("GPS panel closed; export was not requested",0) end
+			if archive.limitReached then
+				if connection then connection:Disconnect();connection=nil end
+				table.clear(pending);head=1
+			else
+				drain(true)
+			end
+			progress(archive.limitReached and "Limite d'objets atteinte — clique sur Exporter" or "Parcours en pause — explore ou clique sur Exporter")
+			task.wait(0.25)
+		end
+		summary.manualWaitSeconds = os.clock()-waitStarted
+		summary.exportTrigger = "button"
 	end,function(message) return tostring(message) end)
 	if connection then connection:Disconnect() end
 	if requestThread then pcall(task.cancel,requestThread) end

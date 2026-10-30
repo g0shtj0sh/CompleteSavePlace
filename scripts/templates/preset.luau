@@ -164,6 +164,7 @@ local ok, result = xpcall(function()
 		assert(gpsChunk,"GPS compilation failed: " .. tostring(gpsError))
 		local gps = gpsChunk()
 		workspaceCapture = gps.run(launchOptions.GPS,onProgress)
+		assert(workspaceCapture.summary.exportTrigger == "button", "GPS export requires an explicit Exporter button action")
 		print(prefix .. "GPS stopped: " .. tostring(workspaceCapture.summary.reason) .. "; coverage remains unverified.")
 	end
 	local source

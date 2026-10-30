@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.7.1 ? 2026-10-31
+
+- GPS exports now require an explicit Exporter button action. Grid exhaustion,
+  request failures, and time/point/object limits never trigger automatic saving.
+- Keep the panel open and retain manually explored regions while waiting, within
+  the object budget. Missing or externally closed panels abort without exporting.
+- Added regression coverage for delayed clicks, manual exploration after pause,
+  missing/closed panels, and the wrapper export authorization guard.
+
 ## 0.7.0 ? 2026-10-30
 
 - Added UltraCompleteSavePlaceGPS and UltraNoModuleScriptsGPS for Universal and

@@ -101,15 +101,17 @@ Requests remain subject to server behavior, bandwidth, and client memory.
 1. Choose one of the GPS launchers above and select Universal or Potassium.
 2. Run the copied loader. The GPS panel shows attempted points, an estimated
    grid total, retained instance count, and a progress bar. The estimate can grow.
-3. Let the bounded traversal finish, or click **Arr?ter le GPS et exporter la
-   collecte** to save the content captured so far.
-4. Ordinary serialization starts after collection. Open the resulting place in
+3. Let the bounded traversal finish, or continue exploring manually once it pauses.
+   **Only click Exporter la collecte when you want the export to start.**
+   Reaching a limit or exhausting the grid never starts an export.
+4. Ordinary serialization starts only after your Exporter button action. Open the resulting place in
    Studio and inspect the `gps` section of `report.json`.
 
 The GPS bar measures **point attempts**, including unsuccessful requests. It
 never represents a percentage of the real map recovered. A returned streaming
 request does not establish that a region is fully loaded. If the progress panel
-cannot be created, console/checkpoint progress and automatic budgets still work.
+cannot be created, the GPS preset fails without exporting: a visible Exporter
+button is required. Closing the panel externally also aborts without exporting.
 
 ### Default budgets
 
@@ -118,7 +120,8 @@ cannot be created, console/checkpoint progress and automatic budgets still work.
 - `InitialRadius = 1024`, `MaxRadius = 4096`: initial X/Z range and hard maximum
   distance on each axis from the starting position.
 - `MaxCells = 196`, `MaxSeconds = 600`: at most 196 point attempts or 10 minutes
-  of collection. The later Ultra export has its own duration.
+  of automatic traversal, after which GPS waits for your click. The later Ultra
+  export has its own duration.
 - `RequestTimeout = 4`, `SettleSeconds = 1`: bounded request duration followed by
   a short interval to receive instances. One request runs at a time. An overdue
   yielding request ends collection rather than accumulating background requests.
@@ -128,7 +131,11 @@ cannot be created, console/checkpoint progress and automatic budgets still work.
   Supplying `Bounds` makes the X/Z area fixed. `Height` defaults to the initial
   character/camera Y coordinate; a single horizontal pass does not cover every floor.
 
-The collector exports a partial result when a budget is reached. A grid exhausted
+After a budget is reached, automatic requests pause and **no export starts**.
+The panel stays open; newly observed regions from manual exploration are retained
+within MaxInstances. At the object limit, retention stops too, but the script
+still waits for your Exporter click. Clicking during traversal stops requests and
+exports the current collection. A grid exhausted
 within estimated bounds does not establish full coverage. Native calls that block
 the whole client cannot be interrupted by Lua deadlines or the stop button.
 
@@ -140,7 +147,7 @@ For example, a fixed area within 2048 studs of the starting player:
 ```lua
 local origin = game:GetService("Players").LocalPlayer.Character:GetPivot().Position
 local run = loadstring(game:HttpGet(
-    "https://raw.githubusercontent.com/g0shtj0sh/CompleteSavePlace/v0.7.0/Executors/Potassium/Script%20Presets/UltraNoModuleScriptsGPS.luau",
+    "https://raw.githubusercontent.com/g0shtj0sh/CompleteSavePlace/v0.7.1/Executors/Potassium/Script%20Presets/UltraNoModuleScriptsGPS.luau",
     true
 ))
 run({GPS = {
@@ -180,7 +187,7 @@ private assets, server-only content, or detailed meshes from LOD placeholders.
 
 ### GPS report
 
-`report.json.gps` records `reason`, `coverage: "unverified"`, point attempts,
+`report.json.gps` records `reason`, `exportTrigger: "button"`, `manualWaitSeconds`, `coverage: "unverified"`, point attempts,
 requests completed/failed, retained object count, elapsed collection time,
 estimated bounds, and the budgets. Its `points` list records request coordinates,
 request return/success status, elapsed time, and newly retained instances per point.
@@ -195,7 +202,7 @@ Run a preset in a compatible environment with HTTP access and file APIs:
 
 ```lua
 loadstring(game:HttpGet(
-    "https://raw.githubusercontent.com/g0shtj0sh/CompleteSavePlace/v0.7.0/Script%20Presets/UltraCompleteSavePlace.luau",
+    "https://raw.githubusercontent.com/g0shtj0sh/CompleteSavePlace/v0.7.1/Script%20Presets/UltraCompleteSavePlace.luau",
     true
 ))()
 ```
@@ -321,7 +328,7 @@ Select **Potassium** above any preset and click **Copier le script**. The loader
 
 Both entry points use the same serializer. The Potassium entry point is under
 `Executors/Potassium/saveinstance.luau`; its five presets are under
-`Executors/Potassium/Script Presets/`. Loaders pin both stages to v0.7.0.
+`Executors/Potassium/Script Presets/`. Loaders pin both stages to v0.7.1.
 For local adapter development, edit its `CORE_URL` as well as the preset's
 `CORE_PATH`; opting into a local adapter alone still downloads its pinned core.
 
