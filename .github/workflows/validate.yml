@@ -41,7 +41,7 @@ jobs:
           unzip -q .tools/luau.zip -d .tools/luau
           chmod +x .tools/luau/luau-compile .tools/luau/luau
       - name: Compile shared engine, adapter, and presets without executing Roblox code
-        run: .tools/luau/luau-compile --null StreamingCapture.luau saveinstance.luau "Script Presets/"*.luau Executors/Potassium/saveinstance.luau "Executors/Potassium/Script Presets/"*.luau
+        run: .tools/luau/luau-compile --null "Economy Analyzer/"*.luau StreamingCapture.luau saveinstance.luau "Script Presets/"*.luau Executors/Potassium/saveinstance.luau "Executors/Potassium/Script Presets/"*.luau
       - name: Exercise preset preflight and output evidence with a mocked engine
         run: python scripts/test_presets.py --luau .tools/luau/luau
       - name: Check actual property-reader regressions
@@ -52,6 +52,8 @@ jobs:
         run: python scripts/test_content_metadata.py --luau .tools/luau/luau
       - name: Check GPS grid, streaming lifecycle, and retained export hierarchy
         run: python scripts/test_gps.py --luau .tools/luau/luau
+      - name: Check passive economy observation, reports, and source candidates
+        run: python scripts/test_economy.py --luau .tools/luau/luau
       - name: Check Potassium adapter contracts
         run: python scripts/test_potassium.py --luau .tools/luau/luau
       - name: Check export deadlines, bytecode memoization, and chunk fallbacks

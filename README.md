@@ -29,6 +29,8 @@ The [UltraNoModuleScripts preset](docs/PRESETS.md#ultranomodulescripts) keeps Ul
 
 The experimental [GPS presets](docs/PRESETS.md#gps-streaming-collection) collect streaming zones on a bounded grid before Ultra export, with or without ModuleScript code. Both Universal and Potassium profiles are available. Coverage and Studio output remain unverified.
 
+The separate [Economy Analyzer](docs/ECONOMY.md) observes accessible economic fields and changes, supports explicit configuration-source inspection, and exports local JSON/HTML reports. It does not alter game state or claim to reconstruct hidden server rules.
+
 ## The project
 
 **CompleteSavePlace** is a Luau toolkit for exporting accessible Roblox
@@ -77,7 +79,7 @@ LocalScript or Studio command-bar script.
 
 ```lua
 local source = game:HttpGet(
-    "https://raw.githubusercontent.com/g0shtj0sh/CompleteSavePlace/v0.7.1/saveinstance.luau",
+    "https://raw.githubusercontent.com/g0shtj0sh/CompleteSavePlace/v0.8.0/saveinstance.luau",
     true
 )
 local completeSavePlace = assert(loadstring(source, "CompleteSavePlace"))()

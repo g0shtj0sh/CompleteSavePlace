@@ -23,6 +23,11 @@ label = "Script Presets"
 position = "left"
 
 [[navbar.items]]
+to = "/docs/ECONOMY"
+label = "Economy Analyzer"
+position = "left"
+
+[[navbar.items]]
 href = "https://github.com/g0shtj0sh/CompleteSavePlace/blob/main/README.fr.md"
 label = "Français"
 position = "right"

@@ -25,13 +25,17 @@ def main() -> int:
     required = (
         "index.html", "api/CompleteSavePlace/index.html", "docs/intro/index.html",
         "docs/PRESETS/index.html", "docs/OPTIONS/index.html", "docs/USAGE/index.html", "docs/TROUBLESHOOTING/index.html",
-        "docs/GEOMETRY/index.html",
+        "docs/GEOMETRY/index.html", "docs/ECONOMY/index.html",
         "docs/ARCHITECTURE/index.html", "docs/ROADMAP/index.html", "changelog/index.html", "logo.png", "favicon.png",
     )
     errors = [f"Missing built route or asset: {name}" for name in required if not (BUILD / name).is_file()]
     if errors:
         print("\n".join(errors), file=sys.stderr)
         return 1
+
+    economy = (BUILD / "docs/ECONOMY/index.html").read_text(encoding="utf-8")
+    for marker in ('data-tool="EconomyAnalyzer"', "Economy%20Analyzer/analyze.luau", "not_verified"):
+        if marker not in economy: errors.append(f"Economy guide missing: {marker}")
 
     api = Text()
     api.feed((BUILD / "api/CompleteSavePlace/index.html").read_text(encoding="utf-8"))

@@ -42,7 +42,7 @@ Actions to GitHub Pages.
 
 `Script Presets/presets.json` defines the seven configurations. The generator
 combines them with a shared wrapper template. Wrappers perform a basic text
-write/read probe and load the pinned `v0.7.1` engine by default. Local development
+write/read probe and load the pinned `v0.8.0` engine by default. Local development
 requires an explicit `USE_LOCAL_CORE = true`. They record source identity,
 exceptions, and file existence in a JSON sidecar separately from file validity.
 The actual serializer is not duplicated.
@@ -168,7 +168,7 @@ namespace now use CompleteSavePlace. The executable filename remains
 Universal/Potassium switches. XML output contains no exporter credit comment.
 The cache reader preserves prior executor safety state across the rename.
 
-## GPS collection in 0.7.1
+## GPS collection in 0.8.0
 
 `StreamingCapture.luau` is a separate collector shared by the two GPS presets.
 The wrappers load it from the same pinned tag and pass its retained tree through
@@ -183,3 +183,12 @@ The grid is bounded and incremental; scene content observed by the client is the
 only automatic source of estimated bounds. Tests simulate streaming and exercise
 the real planner, archive, request lifecycle, and engine merge/collection code.
 Live Roblox streaming and complete Studio output have not been verified.
+
+## Economy Analyzer in 0.8.0
+
+`Economy Analyzer/Analyzer.luau` is independent of the place serializer. Its
+version-pinned `analyze.luau` loader returns a passive observer session. Discovery
+uses breadth-first, per-root quotas and watches matched local-player/config
+values. Static source tokenization produces candidates; optional decompilation
+is explicit and never executes game modules. Manual markers do not establish
+causality. JSON/HTML reports retain observations, bounds, and unknown server rules.

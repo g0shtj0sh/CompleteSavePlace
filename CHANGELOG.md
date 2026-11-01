@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.8.0 ? 2026-11-01
+
+- Added an independent Economy Analyzer with passive discovery, bounded
+  observers, action markers, optional source inspection, and manual JSON/HTML
+  reports. No game modules are executed and no game remotes are called or hooked.
+- Separate replicated values, display samples, client source candidates, and
+  unresolved server rules. Current/maximum observed levels never establish caps.
+- Added a local-player scope filter, source priority/budgets, safe offline HTML,
+  export collision/readback checks, and deterministic scanner/parser/lifecycle tests.
+- Verified limited local-player discovery, UI lifecycle, two explicit source
+  reads, and JSON/HTML export with matching readback on a connected Potassium
+  client in Place 120219252362013. Full economy
+  reconstruction and hidden server formulas remain unverified.
+
 ## 0.7.1 ? 2026-10-31
 
 - GPS exports now require an explicit Exporter button action. Grid exhaustion,

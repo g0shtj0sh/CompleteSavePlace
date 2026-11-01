@@ -38,3 +38,10 @@ does not establish a usable backup.
 
 See [usage](USAGE.md), [troubleshooting](TROUBLESHOOTING.md), and the
 [roadmap](ROADMAP.md) for requirements, current limits, and unfinished work.
+
+## Observe an economy
+
+The separate [Economy Analyzer](ECONOMY.md) discovers client-visible economic
+fields, records their changes, and exports a local evidence report. It operates
+independently of place saving and ModuleScript exclusion. Hidden server rules
+and complete economic reconstruction remain unverified.

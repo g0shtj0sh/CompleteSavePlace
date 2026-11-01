@@ -13,6 +13,8 @@ vérifier dans Studio.
 
 Les [deux presets GPS exp?rimentaux](docs/PRESETS.md#gps-streaming-collection) ajoutent une collecte par zones avant les versions Ultra avec ou sans ModuleScripts. La couverture totale reste non garantie ; le rendu doit ?tre v?rifi? dans Studio.
 
+L?[Economy Analyzer s?par?](docs/ECONOMY.md) observe les donn?es ?conomiques accessibles, leurs changements et les configurations clientes candidates. Il exporte sur demande un rapport HTML/JSON local, sans ex?cuter les modules du jeu ni pr?tendre conna?tre les r?gles serveur cach?es.
+
 **Une base claire pour sauvegarder les instances Roblox accessibles.**
 
 [Site de documentation](https://g0shtj0sh.github.io/CompleteSavePlace/) · [Script Presets](Script%20Presets/README.md) · [English](README.md) · [Utilisation](docs/USAGE.md) · [Dépannage](docs/TROUBLESHOOTING.md) · [Feuille de route](docs/ROADMAP.md)

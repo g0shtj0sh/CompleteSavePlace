@@ -26,6 +26,7 @@ def main() -> int:
         "LICENSE", "NOTICE.md", "README.md", "README.fr.md",
         "saveinstance.luau", "moonwave.toml",
         "StreamingCapture.luau", "scripts/test_gps.py",
+        "Economy Analyzer/Analyzer.luau", "Economy Analyzer/analyze.luau", "docs/ECONOMY.md",
         "docs/USAGE.md", "docs/TROUBLESHOOTING.md", "docs/ROADMAP.md",
         "assets/brand/logo.png", "assets/brand/banner.png",
         ".moonwave/static/logo.png", ".moonwave/static/favicon.png",

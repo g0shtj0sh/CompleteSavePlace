@@ -39,6 +39,7 @@ tempCodeRunnerFile.*
 completesaveplace_cache/
 completesaveinstance_cache/
 CompleteSavePlace_Diagnostics/
+* - Economy Analysis*/
 *.log
 .env
 .env.*
