@@ -79,7 +79,7 @@ LocalScript or Studio command-bar script.
 
 ```lua
 local source = game:HttpGet(
-    "https://raw.githubusercontent.com/g0shtj0sh/CompleteSavePlace/v0.8.0/saveinstance.luau",
+    "https://raw.githubusercontent.com/g0shtj0sh/CompleteSavePlace/v0.8.1/saveinstance.luau",
     true
 )
 local completeSavePlace = assert(loadstring(source, "CompleteSavePlace"))()

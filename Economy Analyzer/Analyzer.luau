@@ -1,5 +1,5 @@
 -- CompleteSavePlace Economy Analyzer. Passive client observations; no remote calls or module execution.
-local Analyzer = {Version="0.8.0"}
+local Analyzer = {Version="0.8.1"}
 local families = {
 	currencies={"money","cash","coin","currency","gems","diamond","gold","income","earn","balance"},
 	levels={"level","rank","prestige"},

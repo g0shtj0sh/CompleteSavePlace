@@ -1,6 +1,6 @@
 {
-  "version": "0.8.0",
-  "sourceHash": "c532a33bca9a81703ca07d255ef3fb9a7ebcc077fc63798ab4f80ebef8483a1b",
+  "version": "0.8.1",
+  "sourceHash": "e7954e40d7ca220ea7101b853c33c4b121b501eaffed1185f6d332c0ebbc7848",
   "groups": [
     "Output",
     "Selection",

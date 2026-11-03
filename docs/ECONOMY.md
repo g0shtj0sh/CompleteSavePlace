@@ -108,7 +108,7 @@ Pass settings to the loader, for example:
 
 ```lua
 local run = loadstring(game:HttpGet(
-    "https://raw.githubusercontent.com/g0shtj0sh/CompleteSavePlace/v0.8.0/Economy%20Analyzer/analyze.luau",
+    "https://raw.githubusercontent.com/g0shtj0sh/CompleteSavePlace/v0.8.1/Economy%20Analyzer/analyze.luau",
     true
 ))
 local session = run({MaxSeconds = 900, MaxModules = 20})

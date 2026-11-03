@@ -16,10 +16,15 @@ local function node(class,name,parent)
     return n
 end
 local GPS=assert(loadstring(source))()
-for _,bad in {{Step=0},{MaxCells=0},{MaxRadius=math.huge},{Height='invalid'},{MaxSeconds=0}} do
+for _,bad in {{Step=0},{MaxCells=0},{MaxRadius=math.huge},{Height='invalid'},{MaxSeconds=0},{MaxInstances=-1},{MaxInstances=math.huge}} do
     if bad.Height then continue end
     assert(not pcall(GPS.settings,bad),'Reject invalid budgets')
 end
+assert(GPS.settings().MaxInstances==0,'GPS defaults to unlimited retained objects')
+local unlimited=GPS.newArchive(node('Workspace','Unlimited'),0)
+for i=1,300001 do unlimited:remember(node('Folder',tostring(i),unlimited.root)) end
+assert(unlimited.count==300001 and not unlimited.limitReached,'Retain beyond the former 300000-object cap')
+unlimited=nil
 local settings=GPS.settings({Step=128,InitialRadius=128,MaxRadius=256,MaxCells=25})
 local planner=GPS.newPlanner(settings,vector(0,4,0))
 assert(planner:total()==9)
@@ -115,7 +120,7 @@ local function lifecycle(mode)
     local chunk=assert(loadstring(source));setfenv(chunk,env)
     local runtime=chunk()
     local success,result=pcall(runtime.run,{Step=128,InitialRadius=128,MaxRadius=256,MaxCells=3,RequestTimeout=0.1,
-        SettleSeconds=0.1,MaxInstances=mode=='instances' and 1 or 100,MaxSeconds=mode=='time' and 1 or 20},function(progress)
+        SettleSeconds=0.1,MaxInstances=mode=='instances' and 1 or 0,MaxSeconds=mode=='time' and 1 or 20},function(progress)
         lastProgress=progress
         if mode=='progress-error' then error('checkpoint sink broke') end
     end)

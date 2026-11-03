@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.8.1 - 2026-11-03
+
+- Removed the default GPS object-count ceiling and pending queue cap for both
+  GPS presets on Universal and Potassium. MaxInstances = 0 means unlimited;
+  positive values remain an optional user cap. Memory availability still applies.
+- Preserved manual export and automatic traversal time, radius and cell budgets.
+- Tested retention beyond the former 300,000-object ceiling and the manual export gate.
+
 ## 0.8.0 ? 2026-11-01
 
 - Added an independent Economy Analyzer with passive discovery, bounded

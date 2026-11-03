@@ -125,16 +125,18 @@ button is required. Closing the panel externally also aborts without exporting.
 - `RequestTimeout = 4`, `SettleSeconds = 1`: bounded request duration followed by
   a short interval to receive instances. One request runs at a time. An overdue
   yielding request ends collection rather than accumulating background requests.
-- `MaxInstances = 300000`: maximum retained Workspace nodes. This is an object
-  count budget, not a RAM measurement or a guarantee against native freezes.
+- `MaxInstances = 0`: no object-count limit, for both GPS presets on Universal
+  and Potassium. The pending streaming queue is also uncapped. Available RAM
+  remains the practical limit; very large collections can slow or crash the client.
+  Set a positive integer only if you want an optional object-count cap.
 - `AutoExpand = true`: expand from observed anchored geometry within MaxRadius.
   Supplying `Bounds` makes the X/Z area fixed. `Height` defaults to the initial
   character/camera Y coordinate; a single horizontal pass does not cover every floor.
 
 After a budget is reached, automatic requests pause and **no export starts**.
 The panel stays open; newly observed regions from manual exploration are retained
-within MaxInstances. At the object limit, retention stops too, but the script
-still waits for your Exporter click. Clicking during traversal stops requests and
+without an object-count limit by default. If you explicitly configure a positive
+MaxInstances, retention stops at that cap and still waits for your Exporter click. Clicking during traversal stops requests and
 exports the current collection. A grid exhausted
 within estimated bounds does not establish full coverage. Native calls that block
 the whole client cannot be interrupted by Lua deadlines or the stop button.
@@ -147,7 +149,7 @@ For example, a fixed area within 2048 studs of the starting player:
 ```lua
 local origin = game:GetService("Players").LocalPlayer.Character:GetPivot().Position
 local run = loadstring(game:HttpGet(
-    "https://raw.githubusercontent.com/g0shtj0sh/CompleteSavePlace/v0.8.0/Executors/Potassium/Script%20Presets/UltraNoModuleScriptsGPS.luau",
+    "https://raw.githubusercontent.com/g0shtj0sh/CompleteSavePlace/v0.8.1/Executors/Potassium/Script%20Presets/UltraNoModuleScriptsGPS.luau",
     true
 ))
 run({GPS = {
@@ -202,7 +204,7 @@ Run a preset in a compatible environment with HTTP access and file APIs:
 
 ```lua
 loadstring(game:HttpGet(
-    "https://raw.githubusercontent.com/g0shtj0sh/CompleteSavePlace/v0.8.0/Script%20Presets/UltraCompleteSavePlace.luau",
+    "https://raw.githubusercontent.com/g0shtj0sh/CompleteSavePlace/v0.8.1/Script%20Presets/UltraCompleteSavePlace.luau",
     true
 ))()
 ```
@@ -328,7 +330,7 @@ Select **Potassium** above any preset and click **Copier le script**. The loader
 
 Both entry points use the same serializer. The Potassium entry point is under
 `Executors/Potassium/saveinstance.luau`; its five presets are under
-`Executors/Potassium/Script Presets/`. Loaders pin both stages to v0.8.0.
+`Executors/Potassium/Script Presets/`. Loaders pin both stages to v0.8.1.
 For local adapter development, edit its `CORE_URL` as well as the preset's
 `CORE_PATH`; opting into a local adapter alone still downloads its pinned core.
 

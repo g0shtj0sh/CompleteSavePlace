@@ -19,7 +19,7 @@ function GPS.settings(config)
 		MaxRadius = numberOption(config, "MaxRadius", 4096, 128, 16384),
 		MaxCells = math.floor(numberOption(config, "MaxCells", 196, 1, 1024)),
 		MaxSeconds = numberOption(config, "MaxSeconds", 600, 1, 3600),
-		MaxInstances = math.floor(numberOption(config, "MaxInstances", 300000, 1, 1000000)),
+		MaxInstances = math.floor(numberOption(config, "MaxInstances", 0, 0, 9007199254740991)),
 		RequestTimeout = numberOption(config, "RequestTimeout", 4, 0.1, 30),
 		SettleSeconds = numberOption(config, "SettleSeconds", 1, 0, 10),
 		Height = config.Height,
@@ -100,7 +100,7 @@ function GPS.newArchive(root, maximum)
 			local item = chain[i]
 			local parent = i == #chain and root or chain[i+1]
 			if not self.children[item] then
-				if self.count >= maximum then self.limitReached=true; return end
+				if maximum and maximum > 0 and self.count >= maximum then self.limitReached=true; return end
 				self.children[item] = {}
 				self.count += 1
 				local values = {Name=item.Name}
@@ -225,7 +225,7 @@ function GPS.run(config, onProgress)
 	end
 	local ok, failure = xpcall(function()
 		connection = workspace.DescendantAdded:Connect(function(item)
-			if #pending-head+1 >= settings.MaxInstances then archive.limitReached=true;return end
+			if settings.MaxInstances > 0 and #pending-head+1 >= settings.MaxInstances then archive.limitReached=true;return end
 			pending[#pending+1]=item
 		end)
 		progress("Inventaire initial")
@@ -283,7 +283,7 @@ function GPS.run(config, onProgress)
 		if requestThread then pcall(task.cancel,requestThread);requestThread=nil end
 		summary.automaticSeconds=os.clock()-started
 		-- Budgets stop automatic requests, never authorize an export. Keep
-		-- collecting manually visited regions within the object budget until click.
+		-- collecting manually visited regions until click (unlimited objects by default).
 		local waitStarted = os.clock()
 		awaitingExport = not exportRequested
 		while not exportRequested do
